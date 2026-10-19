@@ -1,0 +1,18 @@
+# Segredos
+.env
+.env.*
+!.env.example
+
+# Ambientes e build
+.venv/
+.venv-prod/
+dist/
+build/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Dados locais do Gitruvian e exemplos
+.gitruvian/
+loja-exemplo/
