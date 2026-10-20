@@ -1,0 +1,6 @@
+bundles:
+  - core
+  - dotnet
+  - code-review
+  - frontend
+  - sdd
