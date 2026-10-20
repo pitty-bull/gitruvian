@@ -8,9 +8,17 @@
     <ApplicationIcon>Assets\gitruvian.ico</ApplicationIcon>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
-    <!-- Publicação: um executável autossuficiente (não exige .NET instalado na máquina). -->
+    <!-- Publicação: um único Gitruvian.exe autossuficiente (não exige .NET instalado na máquina).
+         As bibliotecas nativas (Skia, HarfBuzz, SQLite, ANGLE) vão embutidas e são extraídas na primeira
+         execução para a pasta temporária do usuário. Sem trimming: Avalonia, o SDK da Anthropic e o
+         CommunityToolkit usam reflexão. -->
     <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract Condition="'$(RuntimeIdentifier)' != ''">true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile Condition="'$(RuntimeIdentifier)' != ''">true</EnableCompressionInSingleFile>
     <PublishReadyToRun Condition="'$(RuntimeIdentifier)' != ''">true</PublishReadyToRun>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <SatelliteResourceLanguages>pt-BR;en</SatelliteResourceLanguages>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>
   <ItemGroup>
@@ -30,4 +38,11 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Gitruvian.Desktop.Tests" />
   </ItemGroup>
+  <!-- Skia e HarfBuzz publicam símbolos nativos (.pdb, ~100 MB) que não servem ao usuário; o exe deve sair sozinho. -->
+  <Target Name="RemoveNativeSymbols" AfterTargets="Publish" Condition="'$(PublishSingleFile)' == 'true'">
+    <ItemGroup>
+      <_PublishedPdb Include="$(PublishDir)**\*.pdb" />
+    </ItemGroup>
+    <Delete Files="@(_PublishedPdb)" />
+  </Target>
 </Project>

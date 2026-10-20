@@ -36,7 +36,8 @@ telemetria, sem anúncios.
 1. Instale o **Git** (https://git-scm.com). O Gitruvian usa o `git` da sua máquina, como o SourceGit.
 2. Baixe e rode `Gitruvian-win-Setup.exe`. A instalação é por usuário (não pede administrador),
    vai para `%LOCALAPPDATA%\Gitruvian` e cria um atalho no menu Iniciar. Não precisa ter o .NET
-   instalado: o executável já traz tudo.
+   instalado: o executável já traz tudo. Se preferir **sem instalador**, baixe `Gitruvian-win-x64.exe`:
+   é um único arquivo, roda de qualquer pasta, mas não se atualiza sozinho.
 3. Opcional: o **SDK do .NET** (8 ou mais novo), só se você for usar o repositório de exemplo (os
    testes dele rodam com `dotnet run`) ou trabalhar com projetos .NET.
 
@@ -46,10 +47,13 @@ telemetria, sem anúncios.
 > **Mais informações › Executar assim mesmo**. Veja
 > [Distribuição](#distribuição-instalador-assinatura-e-releases) para assinar.
 
-Medidas da versão 0.3.0 (win-x64): instalador **72 MB**, pacote de atualização completo
-**65 MB**, atualização delta entre duas compilações com pouca mudança **~0,1 MB**, instalado em
-disco **~146 MB**. Abertura até a janela aparecer: **1,7 a 2,9 s** (três medições numa máquina com
-Windows 11; varia com disco e antivírus).
+O app é publicado como **um único `Gitruvian.exe`** (autossuficiente, comprimido, sem trimming).
+Medidas da versão 0.3.1 (win-x64): exe **89,6 MB**, instalador **94,7 MB**, pacote de atualização
+completo **86,9 MB**. Abertura até a janela aparecer: **~7 s na primeira vez** (o exe extrai ~20 MB
+de bibliotecas nativas para `%TEMP%\.net\Gitruvian`) e **2,2 a 2,8 s** nas seguintes (medições numa
+máquina com Windows 11; varia com disco e antivírus). Custo do arquivo único: as atualizações delta
+ficam quase do tamanho do pacote completo (o delta 0.3.0 → 0.3.1 tem 81 MB), porque um exe
+comprimido não se presta a diferenças binárias.
 
 **Desinstalar:** Configurações do Windows › Aplicativos › Gitruvian › Desinstalar. Isso remove o
 programa, o atalho e a entrada no registro. Seus dados ficam: as pastas `.gitruvian/` dentro dos
@@ -339,18 +343,19 @@ scripts\package.ps1 -SignParams '/a /fd SHA256 /tr http://timestamp.digicert.com
 scripts\publish-release.ps1 -Version 0.3.1  # envia para github.com/pitty-bull/gitruvian/releases
 ```
 
-- `package` publica o app autossuficiente (`win-x64`, ReadyToRun) e roda `vpk pack`. Saída em
-  `artifacts\releases`: `Gitruvian-win-Setup.exe`, `Gitruvian-win-Portable.zip`,
-  `Gitruvian-<versão>-full.nupkg`, deltas e `releases.win.json`. Mantenha essa pasta entre
-  versões para gerar deltas. O `vpk` recusa gerar uma versão igual ou menor que a última da
+- `package` publica o app em arquivo único (`win-x64`, autossuficiente, ReadyToRun, bibliotecas
+  nativas embutidas, sem `.pdb`) e roda `vpk pack`. Saída em `artifacts\releases`:
+  `Gitruvian-win-Setup.exe`, `Gitruvian-win-Portable.zip`, `Gitruvian-win-x64.exe` (o exe avulso),
+  `Gitruvian-<versão>-full.nupkg`, deltas e `releases.win.json`. O script falha se a publicação
+  tiver mais de um arquivo. Mantenha essa pasta entre versões para gerar deltas. O `vpk` recusa gerar uma versão igual ou menor que a última da
   pasta: para refazer a mesma versão, apague antes os `Gitruvian-<versão>-*.nupkg` dela (ou suba
   a versão).
 - **Assinatura:** sem `-SignParams` nada é assinado e o SmartScreen avisa. Para assinar é preciso
   um certificado de assinatura de código (o projeto não tem um); o `vpk` também aceita Azure
   Trusted Signing. Mesmo assinado, um certificado novo leva um tempo para ganhar reputação.
 - **Publicar:** `publish-release` lê `GITHUB_TOKEN` do `.env` (nunca o imprime), pede que você
-  digite `publicar` e cria a release `v<versão>` com os arquivos. É a partir dela que os apps
-  instalados se atualizam.
+  digite `publicar`, cria a release `v<versão>` com os arquivos do Velopack e anexa o
+  `Gitruvian-win-x64.exe`. É a partir dela que os apps instalados se atualizam.
 - **Testar a atualização sem publicar:** instale um Setup antigo, gere uma versão nova com
   `package` e abra o app instalado com `GITRUVIAN_AUTO_UPDATE=1` e
   `GITRUVIAN_UPDATE_URL=<caminho de artifacts\releases>`.

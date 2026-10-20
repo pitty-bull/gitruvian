@@ -26,4 +26,17 @@ $vpkArgs = @('upload', 'github', '--repoUrl', $RepoUrl, '--token', $token, '--ou
     '--publish', '--releaseName', "Gitruvian $Version", '--tag', "v$Version")
 if ($PreRelease) { $vpkArgs += '--pre' }
 Invoke-Checked { dotnet vpk @vpkArgs }
+
+# Anexa o exe avulso (sem instalador) à mesma release, pela API do GitHub.
+$standalone = Join-Path $releases 'Gitruvian-win-x64.exe'
+if (Test-Path $standalone) {
+    $ownerRepo = ($RepoUrl -replace '^https://github\.com/', '') -replace '\.git$', ''
+    $headers = @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json'; 'X-GitHub-Api-Version' = '2022-11-28' }
+    $release = Invoke-RestMethod -Headers $headers -Uri "https://api.github.com/repos/$ownerRepo/releases/tags/v$Version"
+    $existing = $release.assets | Where-Object { $_.name -eq 'Gitruvian-win-x64.exe' }
+    if ($existing) { Invoke-RestMethod -Method Delete -Headers $headers -Uri $existing.url | Out-Null }
+    $uploadUrl = ($release.upload_url -replace '\{\?name,label\}$', '') + '?name=Gitruvian-win-x64.exe'
+    Invoke-RestMethod -Method Post -Headers $headers -ContentType 'application/octet-stream' -InFile $standalone -Uri $uploadUrl | Out-Null
+    Write-Host 'OK: Gitruvian-win-x64.exe anexado à release.'
+}
 Write-Host "OK: release v$Version publicada. Quem tem o app instalado recebe a atualização na próxima verificação."

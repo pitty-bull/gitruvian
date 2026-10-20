@@ -5,12 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <LangVersion>latest</LangVersion>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Product>Gitruvian</Product>
     <Authors>Gitruvian</Authors>
     <Description>Assistente Git local: indexa o código, propõe diffs, roda testes e registra cada alteração.</Description>
     <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
     <!-- Sem telemetria do SDK/CLI do .NET embutida no app. -->
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <!-- Símbolos dentro da própria DLL: stack traces com número de linha, sem arquivos .pdb soltos no release. -->
+    <DebugType Condition="'$(Configuration)' == 'Release'">embedded</DebugType>
   </PropertyGroup>
 </Project>
