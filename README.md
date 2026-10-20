@@ -51,7 +51,9 @@ O app é publicado como **um único `Gitruvian.exe`** (autossuficiente, comprimi
 Medidas da versão 0.3.1 (win-x64): exe **89,6 MB**, instalador **94,7 MB**, pacote de atualização
 completo **86,9 MB**. Abertura até a janela aparecer: **~7 s na primeira vez** (o exe extrai ~20 MB
 de bibliotecas nativas para `%TEMP%\.net\Gitruvian`) e **2,2 a 2,8 s** nas seguintes (medições numa
-máquina com Windows 11; varia com disco e antivírus). Custo do arquivo único: as atualizações delta
+máquina com Windows 11; varia com disco e antivírus). Instalado em disco: **~220 MB** logo após o
+Setup; durante uma atualização chega a **~330 MB** (pacote baixado + versão anterior) e, depois da
+limpeza automática do Velopack, fica em **~185 MB** (exe + pacote da versão atual + Update.exe). Custo do arquivo único: as atualizações delta
 ficam quase do tamanho do pacote completo (o delta 0.3.0 → 0.3.1 tem 81 MB), porque um exe
 comprimido não se presta a diferenças binárias.
 
