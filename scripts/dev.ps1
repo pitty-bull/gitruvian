@@ -1,7 +1,7 @@
-﻿# Roda o Gitruvian a partir do código-fonte (instalação editável). Ex.: scripts\dev.ps1 doctor
+﻿# Abre o Gitruvian a partir do código-fonte (Debug). Argumento opcional: pasta de um repositório para abrir.
+# Ex.: scripts\dev.ps1    ou    scripts\dev.ps1 D:\meu-projeto
 . "$PSScriptRoot\_common.ps1"
-Assert-DevEnv
+Assert-Dotnet
 Use-ProjectEnvFile
-if (Test-Uv) { uv run --project $Root --python 3.12 gitruvian @args; exit $LASTEXITCODE }
-& "$(Get-VenvBin (Join-Path $Root '.venv'))\gitruvian" @args
+& dotnet run --project $DesktopProject -- @args
 exit $LASTEXITCODE

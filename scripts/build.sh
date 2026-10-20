@@ -1,12 +1,6 @@
 #!/usr/bin/env sh
-# Gera wheel e sdist em dist/.
+# Compila a solução em Release (o instalador sai de scripts/package.ps1, só no Windows).
 . "$(dirname "$0")/_common.sh"
 cd "$ROOT"
-rm -rf dist
-if has_uv; then
-  uv build
-else
-  require_dev_env
-  "$(venv_bin .venv)/python" -m build
-fi
-ls dist
+require_dotnet
+dotnet build "$SOLUTION" -c Release

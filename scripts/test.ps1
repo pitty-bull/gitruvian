@@ -1,7 +1,8 @@
-﻿# Roda a suíte de testes (unitários + smoke test de ponta a ponta). Aceita argumentos do pytest.
+﻿# Roda os testes: unitários do núcleo + E2E da interface (Avalonia headless). Aceita argumentos do dotnet test.
+# Ex.: scripts\test.ps1 --filter FullyQualifiedName~Transfer
 . "$PSScriptRoot\_common.ps1"
 Set-Location $Root
-Assert-DevEnv
-if (Test-Uv) { uv run --python 3.12 pytest @args; exit $LASTEXITCODE }
-& "$(Get-VenvBin '.venv')\python" -m pytest @args
+Assert-Dotnet
+Assert-Git
+& dotnet test $Solution @args
 exit $LASTEXITCODE

@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Gitruvian.Desktop.ViewModels"
+             x:Class="Gitruvian.Desktop.Views.ChangesView"
+             x:DataType="vm:ChangesViewModel">
+  <Panel>
+    <!-- Estado vazio -->
+    <StackPanel IsVisible="{Binding IsEmpty}" Margin="12" Spacing="6">
+      <TextBlock Classes="heading" Text="Nenhuma alteração local" />
+      <TextBlock Classes="muted" TextWrapping="Wrap"
+                 Text="A árvore de trabalho está igual ao último commit. Edite arquivos no seu editor e clique em Atualizar (F5), ou peça uma alteração na aba Assistente." />
+    </StackPanel>
+
+    <Grid x:Name="ContentGrid" IsVisible="{Binding HasChanges}" RowDefinitions="Auto,*,Auto,Auto,*,Auto,Auto,Auto,Auto,Auto" Margin="6">
+      <Label Grid.Row="0" Content="_Não preparados" Target="{Binding #UnstagedList}" FontWeight="SemiBold" Padding="0,0,0,4" />
+      <ListBox Grid.Row="1" x:Name="UnstagedList" ItemsSource="{Binding Unstaged}" SelectedItems="{Binding SelectedUnstaged}"
+               SelectionMode="Multiple" Classes="compact" AutomationProperties.Name="Arquivos não preparados" KeyDown="OnUnstagedKeyDown">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem" x:DataType="vm:FileItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleText}" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:FileItem">
+            <StackPanel Orientation="Horizontal" Spacing="8" ToolTip.Tip="{Binding Entry.Label}">
+              <TextBlock Text="{Binding Code}" Foreground="{Binding Brush}" Classes="mono" FontWeight="Bold" Width="12" />
+              <TextBlock Text="{Binding Path}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <WrapPanel Grid.Row="2" Margin="0,6">
+        <Button x:Name="StageButton" Content="_Preparar" Command="{Binding StageCommand}" Margin="0,0,6,4" ToolTip.Tip="git add dos arquivos selecionados (Enter)" />
+        <Button x:Name="StageAllButton" Content="Preparar _tudo" Command="{Binding StageAllCommand}" Margin="0,0,6,4" />
+        <Button x:Name="DiscardButton" Content="_Descartar…" Classes="danger" Command="{Binding DiscardCommand}" Margin="0,0,6,4"
+                ToolTip.Tip="Desfaz as alterações não preparadas dos arquivos selecionados (pede confirmação)" />
+      </WrapPanel>
+
+      <Label Grid.Row="3" Content="Prepa_rados (stage)" Target="{Binding #StagedList}" FontWeight="SemiBold" Padding="0,6,0,4" />
+      <ListBox Grid.Row="4" x:Name="StagedList" ItemsSource="{Binding Staged}" SelectedItems="{Binding SelectedStaged}"
+               SelectionMode="Multiple" Classes="compact" AutomationProperties.Name="Arquivos preparados" KeyDown="OnStagedKeyDown">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem" x:DataType="vm:FileItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleText}" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:FileItem">
+            <StackPanel Orientation="Horizontal" Spacing="8" ToolTip.Tip="{Binding Entry.Label}">
+              <TextBlock Text="{Binding Code}" Foreground="{Binding Brush}" Classes="mono" FontWeight="Bold" Width="12" />
+              <TextBlock Text="{Binding Path}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <WrapPanel Grid.Row="5" Margin="0,6">
+        <Button x:Name="UnstageButton" Content="_Remover do stage" Command="{Binding UnstageCommand}" Margin="0,0,6,4" ToolTip.Tip="(Enter)" />
+        <Button x:Name="UnstageAllButton" Content="Remover t_odos" Command="{Binding UnstageAllCommand}" Margin="0,0,6,4" />
+      </WrapPanel>
+
+      <Label Grid.Row="6" Content="_Mensagem do commit" Target="{Binding #MessageBox}" FontWeight="SemiBold" Padding="0,6,0,4" />
+      <TextBox Grid.Row="7" x:Name="MessageBox" Text="{Binding Message}" AcceptsReturn="True" TextWrapping="Wrap" Height="80"
+               PlaceholderText="Resumo em uma linha; detalhes depois de uma linha em branco. Ctrl+Enter commita."
+               AutomationProperties.Name="Mensagem do commit">
+        <TextBox.KeyBindings>
+          <KeyBinding Gesture="Ctrl+Enter" Command="{Binding CommitCommand}" />
+        </TextBox.KeyBindings>
+      </TextBox>
+      <TextBlock Grid.Row="8" Text="{Binding CommitHint}" Classes="muted" TextWrapping="Wrap" Margin="0,4" />
+      <Button Grid.Row="9" x:Name="CommitButton" Content="_Commitar preparados" Classes="primary" Command="{Binding CommitCommand}"
+              HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+    </Grid>
+  </Panel>
+</UserControl>

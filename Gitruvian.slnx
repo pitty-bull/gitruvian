@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Gitruvian.Core/Gitruvian.Core.csproj" />
+    <Project Path="src/Gitruvian.Desktop/Gitruvian.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Gitruvian.Core.Tests/Gitruvian.Core.Tests.csproj" />
+    <Project Path="tests/Gitruvian.Desktop.Tests/Gitruvian.Desktop.Tests.csproj" />
+  </Folder>
+</Solution>

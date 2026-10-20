@@ -1,35 +1,22 @@
-# Funções compartilhadas pelos scripts (POSIX sh). Não execute diretamente.
+# Funções compartilhadas pelos scripts POSIX do Gitruvian (.NET). Não execute diretamente.
 set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
+SOLUTION="$ROOT/Gitruvian.slnx"
+DESKTOP="$ROOT/src/Gitruvian.Desktop/Gitruvian.Desktop.csproj"
+# Sem telemetria da CLI do .NET nos scripts do projeto.
+DOTNET_CLI_TELEMETRY_OPTOUT=1; DOTNET_NOLOGO=1; export DOTNET_CLI_TELEMETRY_OPTOUT DOTNET_NOLOGO
 
-has_uv() { command -v uv >/dev/null 2>&1; }
-
-venv_bin() {
-  # Windows (Git Bash) usa Scripts/; Linux e macOS usam bin/.
-  if [ -d "$1/Scripts" ]; then echo "$1/Scripts"; else echo "$1/bin"; fi
+require_dotnet() {
+  command -v dotnet >/dev/null 2>&1 || { echo "ERRO: SDK do .NET não encontrado. Instale o .NET 10 SDK: https://dotnet.microsoft.com/download" >&2; exit 1; }
+  dotnet --list-sdks | grep -q "^10\." || { echo "ERRO: é preciso o .NET 10 SDK." >&2; exit 1; }
 }
 
-find_python312() {
-  for candidate in python3.12 python3 python; do
-    if command -v "$candidate" >/dev/null 2>&1 &&
-       "$candidate" -c 'import sys; raise SystemExit(sys.version_info[:2] != (3, 12))' 2>/dev/null; then
-      command -v "$candidate"; return 0
-    fi
-  done
-  return 1
+require_git() {
+  command -v git >/dev/null 2>&1 || { echo "ERRO: git não encontrado no PATH." >&2; exit 1; }
 }
 
 use_project_env_file() {
-  # dev/run podem ser chamados de qualquer pasta (o repositório-alvo é a pasta atual);
-  # o .env lido é o deste projeto, salvo se GITRUVIAN_ENV_FILE já estiver definido.
   if [ -z "${GITRUVIAN_ENV_FILE:-}" ] && [ -f "$ROOT/.env" ]; then
     GITRUVIAN_ENV_FILE="$ROOT/.env"; export GITRUVIAN_ENV_FILE
-  fi
-}
-
-require_dev_env() {
-  if [ ! -d "$ROOT/.venv" ]; then
-    echo "ERRO: ambiente de desenvolvimento ausente. Rode primeiro: scripts/install.sh" >&2
-    exit 1
   fi
 }

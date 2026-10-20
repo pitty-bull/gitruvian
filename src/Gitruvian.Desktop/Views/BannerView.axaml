@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Gitruvian.Desktop.ViewModels"
+             x:Class="Gitruvian.Desktop.Views.BannerView"
+             x:DataType="vm:BannerViewModel"
+             IsVisible="{Binding IsVisible}">
+  <!-- Mensagem de estado (sucesso, erro, aviso, info). Lida por leitores de tela assim que muda. -->
+  <Border Background="{Binding Tint}" BorderBrush="{Binding Accent}" BorderThickness="4,1,1,1" CornerRadius="4" Padding="10,8"
+          AutomationProperties.LiveSetting="Assertive" AutomationProperties.Name="{Binding AccessibleText}">
+    <DockPanel>
+      <Button DockPanel.Dock="Right" Content="✕" Command="{Binding ClearCommand}" Padding="8,2" VerticalAlignment="Top"
+              AutomationProperties.Name="Fechar mensagem" ToolTip.Tip="Fechar mensagem" />
+      <StackPanel Spacing="2">
+        <SelectableTextBlock TextWrapping="Wrap">
+          <Run Text="{Binding Icon}" FontWeight="Bold" Foreground="{Binding Accent}" />
+          <Run Text=" " />
+          <Run Text="{Binding Text}" />
+        </SelectableTextBlock>
+        <TextBlock Text="{Binding Hint}" IsVisible="{Binding HasHint}" Classes="muted" TextWrapping="Wrap" />
+      </StackPanel>
+    </DockPanel>
+  </Border>
+</UserControl>

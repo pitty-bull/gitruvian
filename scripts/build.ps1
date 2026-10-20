@@ -1,11 +1,6 @@
-﻿# Gera wheel e sdist em dist\.
+﻿# Compila a solução em Release (sem gerar instalador; para isso use scripts\package.ps1).
 . "$PSScriptRoot\_common.ps1"
 Set-Location $Root
-if (Test-Path 'dist') { Remove-Item -Recurse -Force 'dist' }
-if (Test-Uv) {
-    Invoke-Checked { uv build }
-} else {
-    Assert-DevEnv
-    Invoke-Checked { & "$(Get-VenvBin '.venv')\python" -m build }
-}
-Get-ChildItem 'dist' | ForEach-Object { $_.Name }
+Assert-Dotnet
+Invoke-Checked { dotnet build $Solution -c Release }
+Write-Host "OK: build Release concluído (versão $(Get-AppVersion))."

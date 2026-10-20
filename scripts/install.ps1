@@ -1,20 +1,13 @@
-﻿# Instala o Gitruvian em .venv (Python 3.12) com dependências de desenvolvimento.
+﻿# Prepara o ambiente de desenvolvimento: confere .NET 10 e git, restaura pacotes e ferramentas (vpk)
+# e cria o .env do projeto a partir do .env.example (modo padrão: sem modelo, totalmente local).
 . "$PSScriptRoot\_common.ps1"
 Set-Location $Root
-
-if (Test-Uv) {
-    Invoke-Checked { uv sync --python 3.12 --all-extras }
-} else {
-    $py = Find-Python312
-    if (-not $py) { Write-Error 'Python 3.12 não encontrado. Instale-o ou instale o uv: https://docs.astral.sh/uv/' }
-    Invoke-Checked { Invoke-Expression "$py -m venv .venv" }
-    $bin = Get-VenvBin '.venv'
-    Invoke-Checked { & "$bin\python" -m pip install --upgrade pip }
-    Invoke-Checked { & "$bin\python" -m pip install -e '.[anthropic]' 'pytest>=8.0' 'build>=1.2' }
-}
-
+Assert-Dotnet
+Assert-Git
+Invoke-Checked { dotnet tool restore }
+Invoke-Checked { dotnet restore $Solution }
 if (-not (Test-Path '.env')) {
     Copy-Item '.env.example' '.env'
-    Write-Host 'INFO: .env criado a partir de .env.example (modo padrão: sem modelo, totalmente local).'
+    Write-Host 'INFO: .env criado a partir de .env.example (sem modelo: nada sai desta máquina).'
 }
-Write-Host 'OK: instalação concluída. Experimente: scripts\dev.ps1 sample create .\loja-exemplo'
+Write-Host 'OK: ambiente pronto. Abra o app com: scripts\dev.ps1   ·   testes: scripts\test.ps1'

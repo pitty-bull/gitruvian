@@ -1,0 +1,16 @@
+<Project>
+  <!-- Configuração comum a todos os projetos .NET do Gitruvian. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <Version>0.3.0</Version>
+    <Product>Gitruvian</Product>
+    <Authors>Gitruvian</Authors>
+    <Description>Assistente Git local: indexa o código, propõe diffs, roda testes e registra cada alteração.</Description>
+    <SatelliteResourceLanguages>pt-BR</SatelliteResourceLanguages>
+    <!-- Sem telemetria do SDK/CLI do .NET embutida no app. -->
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+</Project>

@@ -1,45 +1,56 @@
-﻿# Funções compartilhadas pelos scripts PowerShell. Não execute diretamente.
+﻿# Funções compartilhadas pelos scripts PowerShell do Gitruvian (.NET). Não execute diretamente.
 $ErrorActionPreference = 'Stop'
 $Root = Split-Path -Parent $PSScriptRoot
+$Solution = Join-Path $Root 'Gitruvian.slnx'
+$DesktopProject = Join-Path $Root 'src\Gitruvian.Desktop\Gitruvian.Desktop.csproj'
+$Artifacts = Join-Path $Root 'artifacts'
+$Runtime = 'win-x64'
+# Sem telemetria da CLI do .NET nos scripts do projeto.
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+$env:DOTNET_NOLOGO = '1'
 
-function Test-Uv { return [bool](Get-Command uv -ErrorAction SilentlyContinue) }
-
-function Get-VenvBin([string]$Venv) {
-    if (Test-Path (Join-Path $Venv 'Scripts')) { return (Join-Path $Venv 'Scripts') }
-    return (Join-Path $Venv 'bin')
+function Invoke-Checked([scriptblock]$Block) {
+    & $Block
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
 
-function Find-Python312 {
-    foreach ($candidate in @('python3.12', 'python3', 'python')) {
-        $cmd = Get-Command $candidate -ErrorAction SilentlyContinue
-        if ($cmd) {
-            & $cmd.Source -c 'import sys; raise SystemExit(sys.version_info[:2] != (3, 12))' 2>$null
-            if ($LASTEXITCODE -eq 0) { return $cmd.Source }
-        }
+function Assert-Dotnet {
+    if (-not (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+        Write-Error 'SDK do .NET não encontrado. Instale o .NET 10 SDK: https://dotnet.microsoft.com/download'
     }
-    $launcher = Get-Command py -ErrorAction SilentlyContinue
-    if ($launcher) {
-        & $launcher.Source -3.12 -c 'import sys' 2>$null
-        if ($LASTEXITCODE -eq 0) { return "py -3.12" }
+    $sdks = & dotnet --list-sdks
+    if (-not ($sdks | Where-Object { $_ -match '^10\.' })) {
+        Write-Error "É preciso o .NET 10 SDK (encontrados: $($sdks -join '; ')). https://dotnet.microsoft.com/download"
     }
-    return $null
+}
+
+function Assert-Git {
+    if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+        Write-Error 'git não encontrado no PATH. Instale o Git: https://git-scm.com'
+    }
+}
+
+function Get-AppVersion {
+    [xml]$props = Get-Content (Join-Path $Root 'Directory.Build.props')
+    return ($props.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
 }
 
 function Use-ProjectEnvFile {
-    # dev/run podem ser chamados de qualquer pasta (o repositório-alvo é a pasta atual);
-    # o .env lido é o deste projeto, salvo se GITRUVIAN_ENV_FILE já estiver definido.
+    # Em desenvolvimento, lê o .env deste projeto (salvo se GITRUVIAN_ENV_FILE já estiver definido).
     if (-not $env:GITRUVIAN_ENV_FILE -and (Test-Path (Join-Path $Root '.env'))) {
         $env:GITRUVIAN_ENV_FILE = Join-Path $Root '.env'
     }
 }
 
-function Assert-DevEnv {
-    if (-not (Test-Path (Join-Path $Root '.venv'))) {
-        Write-Error 'Ambiente de desenvolvimento ausente. Rode primeiro: scripts\install.ps1'
+function Read-DotEnvValue([string]$Key) {
+    # Lê uma chave do .env do projeto sem imprimir o valor (usado para segredos de publicação).
+    $file = Join-Path $Root '.env'
+    if (-not (Test-Path $file)) { return $null }
+    foreach ($line in Get-Content $file) {
+        if ($line -match "^\s*$Key\s*=\s*(.*)$") {
+            $value = $Matches[1].Trim().Trim('"').Trim("'")
+            if ($value) { return $value }
+        }
     }
-}
-
-function Invoke-Checked([scriptblock]$Block) {
-    & $Block
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    return $null
 }

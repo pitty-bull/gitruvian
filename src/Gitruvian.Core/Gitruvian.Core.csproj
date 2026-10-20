@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Núcleo sem interface: banco SQLite, git, diffs, índice, modelos e fluxo de propostas. -->
+  <PropertyGroup>
+    <RootNamespace>Gitruvian.Core</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+    <PackageReference Include="Anthropic" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Gitruvian.Core.Tests" />
+  </ItemGroup>
+</Project>

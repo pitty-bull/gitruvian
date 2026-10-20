@@ -1,0 +1,272 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Gitruvian.Desktop.ViewModels"
+        xmlns:c="using:Gitruvian.Desktop.Controls"
+        xmlns:v="using:Gitruvian.Desktop.Views"
+        x:Class="Gitruvian.Desktop.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="{Binding Title}"
+        Icon="avares://Gitruvian/Assets/gitruvian.ico"
+        Width="1400" Height="860" MinWidth="900" MinHeight="560"
+        WindowStartupLocation="CenterScreen">
+
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl+O" Command="{Binding OpenRepoCommand}" />
+    <KeyBinding Gesture="Ctrl+W" Command="{Binding CloseRepoCommand}" />
+    <KeyBinding Gesture="F5" Command="{Binding RefreshCommand}" />
+    <KeyBinding Gesture="Ctrl+I" Command="{Binding ReindexCommand}" />
+    <KeyBinding Gesture="Ctrl+B" Command="{Binding NewBranchCommand}" />
+    <KeyBinding Gesture="Ctrl+E" Command="{Binding ExportDataCommand}" />
+    <KeyBinding Gesture="Ctrl+Shift+E" Command="{Binding ImportDataCommand}" />
+    <KeyBinding Gesture="Ctrl+OemComma" Command="{Binding OpenSettingsCommand}" />
+    <KeyBinding Gesture="F1" Command="{Binding ShowShortcutsCommand}" />
+  </Window.KeyBindings>
+
+  <DockPanel>
+    <!-- ======================================================== menu -->
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_Arquivo">
+        <MenuItem Header="_Abrir repositório…" Command="{Binding OpenRepoCommand}" InputGesture="Ctrl+O" />
+        <MenuItem Header="_Fechar repositório" Command="{Binding CloseRepoCommand}" InputGesture="Ctrl+W" />
+        <Separator />
+        <MenuItem Header="_Exportar dados…" Command="{Binding ExportDataCommand}" InputGesture="Ctrl+E" />
+        <MenuItem Header="I_mportar dados…" Command="{Binding ImportDataCommand}" InputGesture="Ctrl+Shift+E" />
+        <Separator />
+        <MenuItem Header="_Sair" Click="OnQuit" InputGesture="Alt+F4" />
+      </MenuItem>
+      <MenuItem Header="_Repositório">
+        <MenuItem Header="A_tualizar" Command="{Binding RefreshCommand}" InputGesture="F5" />
+        <MenuItem Header="_Indexar código" Command="{Binding ReindexCommand}" InputGesture="Ctrl+I" />
+        <MenuItem Header="_Novo branch…" Command="{Binding NewBranchCommand}" InputGesture="Ctrl+B" />
+        <Separator />
+        <MenuItem Header="_Configurações…" Command="{Binding OpenSettingsCommand}" InputGesture="Ctrl+OemComma" />
+      </MenuItem>
+      <MenuItem Header="_Exemplo">
+        <MenuItem Header="Criar repositório de _exemplo…" Command="{Binding CreateSampleCommand}" />
+        <MenuItem Header="_Limpar registros de exemplo" Command="{Binding ClearSamplesCommand}" />
+        <MenuItem Header="_Apagar este repositório de exemplo…" Command="{Binding RemoveSampleCommand}" />
+      </MenuItem>
+      <MenuItem Header="Aj_uda">
+        <MenuItem Header="_Modelo e modo manual" Command="{Binding ShowModelHelpCommand}" />
+        <MenuItem Header="_Atalhos de teclado" Command="{Binding ShowShortcutsCommand}" InputGesture="F1" />
+        <MenuItem Header="_Verificar atualizações…" Command="{Binding CheckUpdatesCommand}" />
+        <Separator />
+        <MenuItem Header="_Sobre o Gitruvian" Command="{Binding ShowAboutCommand}" />
+      </MenuItem>
+    </Menu>
+
+    <!-- ======================================================== barra de ferramentas -->
+    <Border DockPanel.Dock="Top" Classes="panel" CornerRadius="0" BorderThickness="0,0,0,1" Padding="8,6">
+      <DockPanel>
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <Button Content="Abrir…" Command="{Binding OpenRepoCommand}" ToolTip.Tip="Abre uma pasta com repositório git (Ctrl+O)" AutomationProperties.Name="Abrir repositório" />
+          <Button Content="Atualizar" Command="{Binding RefreshCommand}" ToolTip.Tip="Relê o estado do repositório (F5)" />
+          <Button Content="Indexar" Command="{Binding ReindexCommand}" ToolTip.Tip="Atualiza o índice de busca usado como contexto para o modelo (Ctrl+I)" AutomationProperties.Name="Indexar código" />
+          <Button Content="Novo branch…" Command="{Binding NewBranchCommand}" ToolTip.Tip="Cria e troca para um branch (Ctrl+B)" />
+          <Button Content="Exportar…" Command="{Binding ExportDataCommand}" ToolTip.Tip="Salva propostas, testes e histórico em JSON (Ctrl+E)" AutomationProperties.Name="Exportar dados" />
+          <Button Content="Importar…" Command="{Binding ImportDataCommand}" ToolTip.Tip="Lê um JSON exportado pelo Gitruvian (Ctrl+Shift+E)" AutomationProperties.Name="Importar dados" />
+          <Button Content="Configurações…" Command="{Binding OpenSettingsCommand}" ToolTip.Tip="Comando de testes, modelo e local dos dados (Ctrl+,)" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" VerticalAlignment="Center">
+          <Button Content="Reiniciar e atualizar" Classes="primary" IsVisible="{Binding UpdateReady}"
+                  Command="{Binding RestartToUpdateCommand}" ToolTip.Tip="{Binding UpdateMessage}" />
+          <TextBlock Text="[EXEMPLO]" Foreground="#ffcc66" FontWeight="Bold" IsVisible="{Binding IsSampleRepo}" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding RepoName}" Classes="heading" VerticalAlignment="Center" />
+          <TextBlock Text="{Binding BranchLabel}" Classes="muted" VerticalAlignment="Center" />
+        </StackPanel>
+      </DockPanel>
+    </Border>
+
+    <!-- ======================================================== barra de status -->
+    <Border DockPanel.Dock="Bottom" Classes="panel" CornerRadius="0" BorderThickness="0,1,0,0" Padding="8,3">
+      <DockPanel>
+        <ProgressBar DockPanel.Dock="Right" Width="140" IsIndeterminate="True" IsVisible="{Binding IsBusy}"
+                     AutomationProperties.Name="Trabalhando" />
+        <TextBlock Text="{Binding StatusText}" Classes="muted" TextTrimming="CharacterEllipsis"
+                   AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Barra de status" />
+      </DockPanel>
+    </Border>
+
+    <Panel>
+      <!-- ==================================================== tela inicial -->
+      <ScrollViewer IsVisible="{Binding IsWelcome}">
+        <StackPanel MaxWidth="780" Margin="24,28" Spacing="14">
+          <StackPanel Orientation="Horizontal" Spacing="14">
+            <Image Source="avares://Gitruvian/Assets/gitruvian.png" Width="56" Height="56" AutomationProperties.Name="Logotipo do Gitruvian" />
+            <StackPanel VerticalAlignment="Center">
+              <TextBlock Text="Gitruvian" Classes="title" />
+              <TextBlock Classes="muted" TextWrapping="Wrap"
+                         Text="Cliente Git local com assistente: propõe diffs, roda testes e registra cada alteração. Sem contas, sem telemetria." />
+            </StackPanel>
+          </StackPanel>
+
+          <v:BannerView DataContext="{Binding WelcomeBanner}" />
+
+          <Border Classes="panel" Padding="12" IsVisible="{Binding AskAutoUpdate}">
+            <StackPanel Spacing="8">
+              <TextBlock Classes="heading" Text="Atualizações automáticas" />
+              <TextBlock Text="{Binding AutoUpdateQuestion}" TextWrapping="Wrap" />
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <Button Content="_Ativar" Classes="primary" Command="{Binding AnswerAutoUpdateCommand}" CommandParameter="sim"
+                        AutomationProperties.Name="Ativar atualizações automáticas" />
+                <Button Content="Agora _não" Command="{Binding AnswerAutoUpdateCommand}" CommandParameter="nao"
+                        AutomationProperties.Name="Não verificar atualizações automaticamente" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <Button x:Name="OpenButton" Content="_Abrir repositório…" Classes="primary" Command="{Binding OpenRepoCommand}" Padding="16,8" />
+            <Button Content="Criar repositório de _exemplo…" Command="{Binding CreateSampleCommand}" Padding="16,8"
+                    ToolTip.Tip="Cria um repositório fictício com um bug e uma proposta de correção" />
+          </StackPanel>
+
+          <Label Content="Repositórios _recentes" Target="{Binding #RecentList}" FontWeight="SemiBold" Margin="0,10,0,0" Padding="0" />
+          <TextBlock Classes="muted" IsVisible="{Binding !HasRecent}" TextWrapping="Wrap"
+                     Text="Nenhum repositório aberto ainda. Abra uma pasta com um repositório git, ou crie o repositório de exemplo para conhecer o ciclo: pedir → revisar → aplicar → testar → commitar." />
+          <ListBox x:Name="RecentList" ItemsSource="{Binding Recent}" SelectedItem="{Binding SelectedRecent}"
+                   IsVisible="{Binding HasRecent}" MaxHeight="320" Classes="compact"
+                   AutomationProperties.Name="Repositórios recentes" KeyDown="OnRecentKeyDown" DoubleTapped="OnRecentDoubleTapped">
+            <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="x:String">
+                <TextBlock Text="{Binding}" Padding="2" />
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+          <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HasRecent}">
+            <Button Content="Abrir _selecionado" Command="{Binding OpenRecentCommand}" CommandParameter="{x:Null}" />
+            <Button Content="_Tirar da lista" Command="{Binding ForgetRecentCommand}" CommandParameter="{x:Null}"
+                    ToolTip.Tip="Remove da lista de recentes; nada é apagado do disco (Delete)" />
+          </StackPanel>
+          <TextBlock Classes="muted" TextWrapping="Wrap" Margin="0,16,0,0"
+                     Text="Privacidade: os dados ficam em .gitruvian/ dentro de cada repositório. O app só acessa a rede quando você pede uma proposta a um modelo remoto ou ativa a verificação de atualizações." />
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- ==================================================== repositório aberto -->
+      <Grid IsVisible="{Binding IsRepoOpen}" RowDefinitions="Auto,*">
+        <v:BannerView Grid.Row="0" Margin="8,8,8,0" DataContext="{Binding Banner}" />
+
+        <Grid Grid.Row="1" ColumnDefinitions="230,4,*,4,460" Margin="8">
+          <!-- barra lateral -->
+          <Border Grid.Column="0" Classes="panel" Padding="8">
+            <DockPanel>
+              <StackPanel DockPanel.Dock="Top" Spacing="2" Margin="0,0,0,8">
+                <TextBlock Text="{Binding RepoName}" Classes="heading" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding Repo}" Classes="muted" FontSize="11" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding Repo}" />
+              </StackPanel>
+              <StackPanel DockPanel.Dock="Bottom" Spacing="4" Margin="0,8,0,0">
+                <Button Content="Trocar para o _branch" Command="{Binding SwitchBranchCommand}" CommandParameter="{x:Null}" HorizontalAlignment="Stretch" />
+              </StackPanel>
+              <Label DockPanel.Dock="Top" Content="_Branches locais" Target="{Binding #BranchList}" Padding="0,0,0,4" FontWeight="SemiBold" />
+              <ListBox x:Name="BranchList" ItemsSource="{Binding Branches}" SelectedItem="{Binding SelectedBranch}" Classes="compact"
+                       AutomationProperties.Name="Branches locais" KeyDown="OnBranchKeyDown" DoubleTapped="OnBranchDoubleTapped">
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="vm:BranchItem">
+                    <TextBlock Text="{Binding Display}" TextTrimming="CharacterEllipsis" />
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </DockPanel>
+          </Border>
+
+          <GridSplitter Grid.Column="1" ResizeDirection="Columns" />
+
+          <!-- grafo + diff -->
+          <Grid Grid.Column="2" RowDefinitions="*,4,*">
+            <Border Grid.Row="0" Classes="panel">
+              <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Histórico (todos os branches)" Classes="heading" Margin="8,6" />
+                <ListBox x:Name="GraphList" Classes="graph" ItemsSource="{Binding GraphItems}" SelectedItem="{Binding SelectedGraphItem}"
+                         AutomationProperties.Name="Grafo de commits">
+                  <ListBox.Styles>
+                    <Style Selector="ListBoxItem" x:DataType="vm:GraphItem">
+                      <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleText}" />
+                    </Style>
+                  </ListBox.Styles>
+                  <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="vm:GraphItem">
+                      <Grid ColumnDefinitions="Auto,*,170,130,80" Height="26">
+                        <c:GraphCell Grid.Column="0" Item="{Binding}" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" ClipToBounds="True">
+                          <ItemsControl ItemsSource="{Binding Refs}">
+                            <ItemsControl.ItemsPanel>
+                              <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" Spacing="4" />
+                              </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="vm:RefBadge">
+                                <Border Background="{Binding Background}" CornerRadius="3" Padding="5,0">
+                                  <TextBlock Text="{Binding Display}" FontSize="11" Foreground="White" />
+                                </Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Text="{Binding Subject}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                                     Classes.working="{Binding IsWorking}" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Author}" Classes="muted" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" Margin="8,0" />
+                        <TextBlock Grid.Column="3" Text="{Binding Date}" Classes="muted" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="4" Text="{Binding ShortSha}" Classes="muted mono" VerticalAlignment="Center" />
+                      </Grid>
+                    </DataTemplate>
+                  </ListBox.ItemTemplate>
+                </ListBox>
+              </DockPanel>
+            </Border>
+
+            <GridSplitter Grid.Row="1" ResizeDirection="Rows" />
+
+            <Border Grid.Row="2" Classes="panel">
+              <DockPanel>
+                <DockPanel DockPanel.Dock="Top" Margin="8,6">
+                  <Button DockPanel.Dock="Right" Content="Copiar diff" Click="OnCopyDiff" Padding="8,2"
+                          ToolTip.Tip="Copia o diff exibido para a área de transferência" />
+                  <TextBlock Text="{Binding Diff.Title}" Classes="heading" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                </DockPanel>
+                <Panel>
+                  <TextBlock Text="{Binding Diff.Placeholder}" IsVisible="{Binding Diff.HasPlaceholder}" Classes="muted"
+                             TextWrapping="Wrap" Margin="12" />
+                  <ListBox x:Name="DiffList" Classes="diff" ItemsSource="{Binding Diff.Lines}" IsVisible="{Binding !Diff.HasPlaceholder}"
+                           SelectionMode="Multiple" AutomationProperties.Name="Linhas do diff">
+                    <ListBox.Styles>
+                      <Style Selector="ListBoxItem" x:DataType="vm:DiffLine">
+                        <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleText}" />
+                      </Style>
+                    </ListBox.Styles>
+                    <ListBox.ItemTemplate>
+                      <DataTemplate x:DataType="vm:DiffLine">
+                        <Border Background="{Binding Background}" Padding="8,0">
+                          <TextBlock Text="{Binding Text}" Foreground="{Binding Foreground}" Classes="mono" />
+                        </Border>
+                      </DataTemplate>
+                    </ListBox.ItemTemplate>
+                  </ListBox>
+                </Panel>
+              </DockPanel>
+            </Border>
+          </Grid>
+
+          <GridSplitter Grid.Column="3" ResizeDirection="Columns" />
+
+          <!-- abas -->
+          <TabControl Grid.Column="4" SelectedIndex="{Binding SelectedTab}" Padding="0,6,0,0">
+            <TabItem Header="Alterações" AutomationProperties.Name="Alterações (Alt+1)">
+              <v:ChangesView x:Name="ChangesPanel" DataContext="{Binding Changes}" />
+            </TabItem>
+            <TabItem Header="Commit" AutomationProperties.Name="Commit (Alt+2)">
+              <v:CommitView x:Name="CommitPanel" DataContext="{Binding CommitDetail}" />
+            </TabItem>
+            <TabItem Header="Assistente" AutomationProperties.Name="Assistente (Alt+3)">
+              <v:AssistantView x:Name="AssistantPanel" DataContext="{Binding Assistant}" />
+            </TabItem>
+            <TabItem Header="Histórico" AutomationProperties.Name="Histórico (Alt+4)">
+              <v:HistoryView x:Name="HistoryPanel" DataContext="{Binding History}" />
+            </TabItem>
+          </TabControl>
+        </Grid>
+      </Grid>
+    </Panel>
+  </DockPanel>
+</Window>

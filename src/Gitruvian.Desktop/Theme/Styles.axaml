@@ -1,0 +1,121 @@
+<!-- Tema escuro do Gitruvian: contraste alto, foco visível em amarelo e botões primários/destrutivos. -->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <SolidColorBrush x:Key="GitruvianBackground" Color="#1e1f22" />
+    <SolidColorBrush x:Key="GitruvianPanel" Color="#26282c" />
+    <SolidColorBrush x:Key="GitruvianBorder" Color="#3a3d42" />
+    <SolidColorBrush x:Key="GitruvianText" Color="#e8e8e8" />
+    <SolidColorBrush x:Key="GitruvianMuted" Color="#b0b4bb" />
+    <SolidColorBrush x:Key="GitruvianFocus" Color="#ffd866" />
+    <SolidColorBrush x:Key="GitruvianPrimary" Color="#2f6fb3" />
+    <SolidColorBrush x:Key="GitruvianDanger" Color="#a33a3a" />
+    <FontFamily x:Key="MonoFont">Cascadia Mono, Consolas, JetBrains Mono, DejaVu Sans Mono, Courier New, monospace</FontFamily>
+  </Styles.Resources>
+
+  <Style Selector="Window">
+    <Setter Property="Background" Value="{StaticResource GitruvianBackground}" />
+    <Setter Property="Foreground" Value="{StaticResource GitruvianText}" />
+    <Setter Property="FontSize" Value="13" />
+  </Style>
+
+  <!-- Foco de teclado sempre visível (2 px amarelo), em qualquer controle. -->
+  <Style Selector="Control">
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border BorderBrush="{StaticResource GitruvianFocus}" BorderThickness="2" CornerRadius="3" Margin="-2" />
+      </FocusAdornerTemplate>
+    </Setter>
+  </Style>
+
+  <Style Selector="TextBlock.muted">
+    <Setter Property="Foreground" Value="{StaticResource GitruvianMuted}" />
+  </Style>
+  <Style Selector="TextBlock.heading">
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="FontSize" Value="14" />
+  </Style>
+  <Style Selector="TextBlock.title">
+    <Setter Property="FontWeight" Value="Bold" />
+    <Setter Property="FontSize" Value="26" />
+  </Style>
+  <Style Selector="TextBlock.working">
+    <Setter Property="FontStyle" Value="Italic" />
+    <Setter Property="Foreground" Value="{StaticResource GitruvianMuted}" />
+  </Style>
+  <Style Selector="TextBlock.validation">
+    <Setter Property="Foreground" Value="#ffcc66" />
+  </Style>
+
+  <Style Selector="Button.primary">
+    <Setter Property="Background" Value="{StaticResource GitruvianPrimary}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.primary:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#3b80c8" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="{StaticResource GitruvianDanger}" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#bb4646" />
+    <Setter Property="Foreground" Value="White" />
+  </Style>
+  <!-- Desabilitado fica neutro: a cor não sugere uma ação disponível. -->
+  <Style Selector="Button.primary:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#33363b" />
+    <Setter Property="Foreground" Value="#8a8f96" />
+  </Style>
+  <Style Selector="Button.danger:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#33363b" />
+    <Setter Property="Foreground" Value="#8a8f96" />
+  </Style>
+
+  <Style Selector="Border.panel">
+    <Setter Property="Background" Value="{StaticResource GitruvianPanel}" />
+    <Setter Property="BorderBrush" Value="{StaticResource GitruvianBorder}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="4" />
+  </Style>
+
+  <Style Selector="TextBox.mono">
+    <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+  </Style>
+  <Style Selector="SelectableTextBlock.mono">
+    <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+  </Style>
+  <Style Selector="TextBlock.mono">
+    <Setter Property="FontFamily" Value="{StaticResource MonoFont}" />
+  </Style>
+
+  <Style Selector="TextBox.invalid">
+    <Setter Property="BorderBrush" Value="#ff8a80" />
+  </Style>
+
+  <Style Selector="ListBox.compact ListBoxItem">
+    <Setter Property="Padding" Value="6,2" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+  <Style Selector="ListBox.graph ListBoxItem">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+    <Setter Property="Height" Value="26" />
+  </Style>
+  <Style Selector="ListBox.diff ListBoxItem">
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="MinHeight" Value="0" />
+  </Style>
+
+  <!-- Abas compactas (o padrão do Fluent é grande demais para o painel lateral). -->
+  <Style Selector="TabItem">
+    <Setter Property="FontSize" Value="14" />
+    <Setter Property="MinHeight" Value="34" />
+    <Setter Property="Padding" Value="10,4" />
+  </Style>
+
+  <Style Selector="GridSplitter">
+    <Setter Property="Background" Value="{StaticResource GitruvianBorder}" />
+  </Style>
+</Styles>

@@ -1,0 +1,106 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Gitruvian.Desktop.ViewModels"
+             x:Class="Gitruvian.Desktop.Views.AssistantView"
+             x:DataType="vm:AssistantViewModel">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled">
+    <StackPanel Margin="6" Spacing="6">
+      <!-- modelo / modo degradado -->
+      <Border Classes="panel" Padding="8">
+        <StackPanel Spacing="2">
+          <TextBlock TextWrapping="Wrap">
+            <Run Text="Modelo: " FontWeight="SemiBold" />
+            <Run Text="{Binding ProviderLabel}" />
+          </TextBlock>
+          <TextBlock x:Name="ProviderText" Text="{Binding ProviderExplanation}" Classes="muted" TextWrapping="Wrap" />
+        </StackPanel>
+      </Border>
+
+      <!-- propostas -->
+      <Label Content="Propo_stas" Target="{Binding #ProposalsList}" FontWeight="SemiBold" Padding="0,10,0,0" />
+      <TextBlock IsVisible="{Binding IsEmpty}" Classes="muted" TextWrapping="Wrap"
+                 Text="Nenhuma proposta ainda. Escreva um pedido em «Novo pedido», abaixo (com modelo ou diff manual), e clique em Propor." />
+      <ListBox x:Name="ProposalsList" ItemsSource="{Binding Proposals}" SelectedItem="{Binding SelectedProposal}" IsVisible="{Binding !IsEmpty}"
+               MaxHeight="200" Classes="compact" AutomationProperties.Name="Propostas">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem" x:DataType="vm:ProposalItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding Display}" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:ProposalItem">
+            <TextBlock Text="{Binding Display}" Foreground="{Binding StatusBrush}" TextTrimming="CharacterEllipsis" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+
+      <!-- detalhe da proposta -->
+      <Border Classes="panel" Padding="8" Margin="0,6,0,0">
+        <StackPanel Spacing="6">
+          <SelectableTextBlock x:Name="DetailText" Text="{Binding DetailText}" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding Warning}" IsVisible="{Binding HasWarning}" Foreground="#ff8a80" TextWrapping="Wrap" />
+
+          <StackPanel Spacing="6" IsVisible="{Binding HasCurrent}">
+            <Label Content="Aplicar em um novo _branch (opcional)" Target="{Binding #BranchBox}" Padding="0" />
+            <TextBox x:Name="BranchBox" Text="{Binding Branch}" IsEnabled="{Binding CanEditBranch}" PlaceholderText="vazio = aplica no branch atual"
+                     AutomationProperties.Name="Novo branch para aplicar" />
+            <WrapPanel>
+              <Button x:Name="ApplyButton" Content="_Aplicar" Classes="primary" Command="{Binding ApplyCommand}" Margin="0,0,6,4"
+                      ToolTip.Tip="Aplica o diff na árvore de trabalho e roda os testes, se houver comando" />
+              <Button x:Name="TestButton" Content="_Testar" Command="{Binding TestCommand}" Margin="0,0,6,4"
+                      ToolTip.Tip="Roda o comando de testes do repositório" />
+              <Button x:Name="RevertButton" Content="Re_verter…" Command="{Binding RevertCommand}" Margin="0,0,6,4"
+                      ToolTip.Tip="Desfaz o diff (ou cria um commit de revert, se já commitado)" />
+              <Button x:Name="RejectButton" Content="R_ejeitar" Classes="danger" Command="{Binding RejectCommand}" Margin="0,0,6,4"
+                      ToolTip.Tip="Marca a proposta como rejeitada (continua no histórico)" />
+            </WrapPanel>
+            <Label Content="Mensagem do co_mmit" Target="{Binding #CommitMessageBox}" Padding="0" />
+            <TextBox x:Name="CommitMessageBox" Text="{Binding CommitMessage}" IsEnabled="{Binding CanEditCommitMessage}"
+                     AutomationProperties.Name="Mensagem do commit da proposta" />
+            <CheckBox x:Name="UntestedCheck" Content="Commitar sem rodar os testes" IsChecked="{Binding Untested}" IsVisible="{Binding ShowUntested}" />
+            <Button x:Name="AcceptButton" Content="_Commitar" Classes="primary" Command="{Binding AcceptCommand}"
+                    HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                    ToolTip.Tip="Cria o commit só com os arquivos da proposta" />
+            <TextBlock Classes="heading" Text="Saída dos testes" Margin="0,6,0,0" />
+            <Border Classes="panel" Padding="6" MinHeight="60" MaxHeight="260">
+              <ScrollViewer>
+                <SelectableTextBlock x:Name="TestOutputText" Text="{Binding TestOutput}" Classes="mono" TextWrapping="Wrap"
+                                     AutomationProperties.Name="Saída dos testes" />
+              </ScrollViewer>
+            </Border>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <!-- novo pedido -->
+      <Expander Header="_Novo pedido" IsExpanded="True" HorizontalAlignment="Stretch" Margin="0,8,0,0"
+                AutomationProperties.Name="Novo pedido">
+        <StackPanel Spacing="6">
+          <Label Content="_Pedido (o que deve mudar)" Target="{Binding #InstructionBox}" Padding="0" />
+          <TextBox x:Name="InstructionBox" Text="{Binding Instruction}" AcceptsReturn="True" TextWrapping="Wrap" Height="70"
+                   Classes.invalid="{Binding InstructionInvalid}"
+                   PlaceholderText="ex.: o frete grátis deve valer também para pedidos de exatamente R$ 200,00. Ctrl+Enter propõe."
+                   AutomationProperties.Name="Pedido">
+            <TextBox.KeyBindings>
+              <KeyBinding Gesture="Ctrl+Enter" Command="{Binding ProposeCommand}" />
+            </TextBox.KeyBindings>
+          </TextBox>
+          <CheckBox x:Name="ManualCheck" Content="Diff _manual (eu colo o diff; nada é enviado a um modelo)" IsChecked="{Binding Manual}" />
+          <StackPanel Spacing="4" IsVisible="{Binding Manual}">
+            <Label Content="D_iff unificado (formato do git diff)" Target="{Binding #PatchBox}" Padding="0" />
+            <TextBox x:Name="PatchBox" Text="{Binding Patch}" AcceptsReturn="True" Height="120" Classes="mono"
+                     PlaceholderText="diff --git a/arquivo b/arquivo&#x0a;--- a/arquivo&#x0a;+++ b/arquivo&#x0a;@@ -1,3 +1,3 @@"
+                     AutomationProperties.Name="Diff unificado" />
+            <Button Content="_Carregar arquivo .patch…" Command="{Binding LoadPatchCommand}" />
+          </StackPanel>
+          <Label Content="_Arquivos de contexto (opcional, separados por vírgula)" Target="{Binding #FilesBox}" Padding="0" />
+          <TextBox x:Name="FilesBox" Text="{Binding Files}" PlaceholderText="ex.: src/App/Servico.cs, tests/App.Testes/ServicoTests.cs" Classes="mono"
+                   AutomationProperties.Name="Arquivos de contexto" />
+          <TextBlock x:Name="ValidationText" Text="{Binding Validation}" Classes="validation" TextWrapping="Wrap"
+                     AutomationProperties.LiveSetting="Polite" />
+          <Button x:Name="ProposeButton" Content="P_ropor" Classes="primary" Command="{Binding ProposeCommand}"
+                  HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+        </StackPanel>
+      </Expander>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

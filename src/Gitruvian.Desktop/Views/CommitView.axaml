@@ -1,0 +1,35 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Gitruvian.Desktop.ViewModels"
+             x:Class="Gitruvian.Desktop.Views.CommitView"
+             x:DataType="vm:CommitViewModel">
+  <Panel>
+    <StackPanel IsVisible="{Binding !HasCommit}" Margin="12" Spacing="6">
+      <TextBlock Classes="heading" Text="Nenhum commit selecionado" />
+      <TextBlock Classes="muted" TextWrapping="Wrap" Text="Selecione um commit no grafo (setas ↑/↓) para ver a mensagem, os arquivos e o diff." />
+    </StackPanel>
+    <Grid x:Name="ContentGrid" IsVisible="{Binding HasCommit}" RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="6">
+      <SelectableTextBlock Grid.Row="0" Text="{Binding Header}" Classes="mono" TextWrapping="Wrap" />
+      <TextBlock Grid.Row="1" Text="{Binding Parents}" Classes="muted mono" TextWrapping="Wrap" Margin="0,2,0,8" />
+      <Border Grid.Row="2" Classes="panel" Padding="8" MaxHeight="220">
+        <ScrollViewer>
+          <SelectableTextBlock Text="{Binding Message}" TextWrapping="Wrap" AutomationProperties.Name="Mensagem do commit" />
+        </ScrollViewer>
+      </Border>
+      <Label Grid.Row="3" Content="_Arquivos (selecione para ver o diff de um arquivo)" Target="{Binding #FilesList}" FontWeight="SemiBold" Padding="0,10,0,4" />
+      <ListBox Grid.Row="4" x:Name="FilesList" ItemsSource="{Binding Files}" SelectedItem="{Binding SelectedFile}" Classes="compact"
+               AutomationProperties.Name="Arquivos do commit">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem" x:DataType="vm:CommitFileItem">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleText}" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="vm:CommitFileItem">
+            <TextBlock Text="{Binding Display}" Classes="mono" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
+  </Panel>
+</UserControl>

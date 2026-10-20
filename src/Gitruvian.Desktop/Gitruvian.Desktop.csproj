@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Aplicativo de desktop (Avalonia). Gera Gitruvian.exe; o instalador sai do vpk (scripts/package.*). -->
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <AssemblyName>Gitruvian</AssemblyName>
+    <RootNamespace>Gitruvian.Desktop</RootNamespace>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Assets\gitruvian.ico</ApplicationIcon>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <BuiltInComInteropSupport>false</BuiltInComInteropSupport>
+    <!-- Publicação: um executável autossuficiente (não exige .NET instalado na máquina). -->
+    <SelfContained Condition="'$(RuntimeIdentifier)' != ''">true</SelfContained>
+    <PublishReadyToRun Condition="'$(RuntimeIdentifier)' != ''">true</PublishReadyToRun>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="Velopack" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Gitruvian.Core\Gitruvian.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Gitruvian.Desktop.Tests" />
+  </ItemGroup>
+</Project>

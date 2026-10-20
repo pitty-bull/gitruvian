@@ -3,16 +3,21 @@
 .env.*
 !.env.example
 
-# Ambientes e build
-.venv/
-.venv-prod/
-dist/
-build/
-*.egg-info/
-__pycache__/
-*.pyc
-.pytest_cache/
+# Ambientes e build (.NET)
+bin/
+obj/
+artifacts/
+TestResults/
+.vs/
+*.user
 
 # Dados locais do Gitruvian e exemplos
 .gitruvian/
 loja-exemplo/
+
+# Artefatos gerados por `npx skills add` (Install-Skills.ps1) — reproduzíveis a
+# partir de skills.yaml + bundles.yaml, não são fonte de verdade.
+.agents/
+.claude/skills/
+.codex/skills/
+skills-lock.json
